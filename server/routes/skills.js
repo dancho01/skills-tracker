@@ -28,7 +28,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params
     const result = await pool.query('SELECT * FROM skills WHERE id = $1', [id]);
-    res.json(result.rows)
+    res.json(result.rows[0])
   } catch (err) {
     console.log(err.message)
   }
