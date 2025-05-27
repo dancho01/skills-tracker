@@ -25,7 +25,8 @@ export default function Home() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          skill: skill
+          skill: skill,
+          level: level
         })
       })
       closeModal()
@@ -68,7 +69,7 @@ export default function Home() {
             <div key={item.id} className="bg-[#d9d9d9] flex justify-between px-6 py-2">
             <div className="flex gap-2"> 
               <h1 className="font-medium">{item.skill}</h1>
-              <h2 className="text-gray-700">Level</h2>
+              <h2 className="text-gray-700 italic">{item.level}</h2>
             </div>
             <div className='hover:cursor-pointer' onClick={() => router.push(`/skill/${item.id}`)}>
               <ArrowForwardIcon />

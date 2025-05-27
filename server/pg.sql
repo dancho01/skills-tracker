@@ -9,7 +9,8 @@ CREATE TABLE users (
 CREATE TABLE skills (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id),
-  skill VARCHAR(255) NOT NULL
+  skill VARCHAR(255) NOT NULL,
+  level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced'))
 );
 
 CREATE TABLE sessions (

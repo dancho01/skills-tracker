@@ -15,8 +15,8 @@ router.get('/', async (req, res) => {
 // POST - add new skill
 router.post('/', async (req, res) => {
   try {
-    const { skill } = req.body
-    const result = await pool.query('INSERT INTO skills (user_id, skill) VALUES (1, $1) RETURNING *', [skill])
+    const { skill, level } = req.body
+    const result = await pool.query('INSERT INTO skills (user_id, skill, level) VALUES (1, $1, $2) RETURNING *', [skill, level])
     res.json(result.rows[0])
   } catch (err) {
     console.log(err.message)
@@ -34,12 +34,12 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-// PUT - update skill 
+// PUT - update skill level
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params
-    const { skill } = req.body
-    await pool.query('UPDATE skills SET skill = $1 WHERE id = $2', [skill, id]);
+    const { level } = req.body
+    await pool.query('UPDATE skills SET level = $1 WHERE id = $2', [level, id]);
     res.json('Updated!')
   } catch (err) {
     console.log(err.message)
