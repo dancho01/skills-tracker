@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Modal from '@/components/Modal';
-import { duration } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 const page = () => {
@@ -13,6 +12,7 @@ const page = () => {
   const [notes, setNotes] = useState('')
   const [level, setLevel] = useState('')
   const [sessions, setSessions] = useState([])
+  const [totalTime, setTotalTime] = useState(0)
   const params = useParams()
   const id = params.id
 
@@ -50,7 +50,10 @@ const page = () => {
         })
       })
       closeModal()
+      setDuration('')
+      setNotes('')
       getSessions()
+      getTotalTime()
     } catch (err) {
       console.log(err.message)
     }
@@ -67,9 +70,20 @@ const page = () => {
     }
   }
 
+  const getTotalTime = async () => {
+    try {
+      const res = await fetch(`http://localhost:5001/stats/${id}`)
+      const data = await res.json()
+      setTotalTime(data)
+    } catch (err) {
+      console.log(err.message)
+    }
+  }
+
   useEffect(() => {
     getSkill()
     getSessions()
+    getTotalTime()
   }, [])
 
   // updates a skill
@@ -86,7 +100,7 @@ const page = () => {
       })
       getSkill()
       setUpdateModal(false)
-      
+
     } catch (err) {
       console.log(err.message)
     }
@@ -109,6 +123,7 @@ const page = () => {
       <div className="w-[80%] mx-auto pt-20">
         <h1 className="text-white text-4xl font-semibold">{skill?.skill}</h1>  
         <h2 className='text-white text-2xl mt-4'>Level: {skill?.level}</h2>
+        <h2 className='text-white text-xl mt-4'>Total Time Practiced: {totalTime} min</h2>
 
         <div className='flex gap-4 mt-4'>
           <button onClick={() => setUpdateModal(true)} className="text-white font-semibold bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded">Update Level</button>
