@@ -1,11 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db')
+const authenticateToken = require('../middleware/auth')
 
 // GET - get all skills for user
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM skills WHERE user_id = 1');
+    const id = req.user.userId;
+    const result = await pool.query('SELECT * FROM skills WHERE user_id = $1', [id]);
     res.json(result.rows)
   } catch (err) {
     console.log(err.message)
@@ -13,10 +15,11 @@ router.get('/', async (req, res) => {
 })
 
 // POST - add new skill
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
     const { skill, level } = req.body
-    const result = await pool.query('INSERT INTO skills (user_id, skill, level) VALUES (1, $1, $2) RETURNING *', [skill, level])
+    const id = req.user.userId;
+    const result = await pool.query('INSERT INTO skills (user_id, skill, level) VALUES ($1, $2, $3) RETURNING *', [id, skill, level])
     res.json(result.rows[0])
   } catch (err) {
     console.log(err.message)
@@ -24,7 +27,7 @@ router.post('/', async (req, res) => {
 })
 
 // GET - get details for a particualr skill
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const result = await pool.query('SELECT * FROM skills WHERE id = $1', [id]);
@@ -35,7 +38,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // PUT - update skill level
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const { level } = req.body
@@ -47,7 +50,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE - delete skill
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     await pool.query('DELETE FROM skills WHERE id = $1', [id]);

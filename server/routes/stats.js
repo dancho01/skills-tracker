@@ -1,9 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db')
+const authenticateToken = require('../middleware/auth')
+
 
 // GET - total time practiced for skill
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const result = await pool.query('SELECT * FROM sessions WHERE skill_id = $1', [id])

@@ -13,6 +13,7 @@ const page = () => {
   const [level, setLevel] = useState('')
   const [sessions, setSessions] = useState([])
   const [totalTime, setTotalTime] = useState(0)
+  const [token, setToken] = useState(null)
   const params = useParams()
   const id = params.id
 
@@ -26,7 +27,11 @@ const page = () => {
 
   const getSkill = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/skills/${id}`)
+      const res = await fetch(`http://localhost:5001/skills/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
       const data = await res.json()
 
       setSkill(data)
@@ -42,7 +47,8 @@ const page = () => {
       await fetch(`http://localhost:5001/sessions/${id}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           duration: duration,
@@ -62,7 +68,11 @@ const page = () => {
   // get all the sessions for the skill 
   const getSessions = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/sessions/skill/${id}`)
+      const res = await fetch(`http://localhost:5001/sessions/skill/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
       const data = await res.json()
       setSessions(data)
     } catch (err) {
@@ -72,7 +82,11 @@ const page = () => {
 
   const getTotalTime = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/stats/${id}`)
+      const res = await fetch(`http://localhost:5001/stats/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
       const data = await res.json()
       setTotalTime(data)
     } catch (err) {
@@ -81,10 +95,15 @@ const page = () => {
   }
 
   useEffect(() => {
+    setToken(localStorage.getItem('accessToken'));
+  }, [])
+
+  useEffect(() => {
+    if (!token) return;
     getSkill()
     getSessions()
     getTotalTime()
-  }, [])
+  }, [token])
 
   // updates a skill
   const updateSkill = async () => {
@@ -92,7 +111,9 @@ const page = () => {
       await fetch(`http://localhost:5001/skills/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+          
         },
         body: JSON.stringify({
           level: level
@@ -110,7 +131,10 @@ const page = () => {
   const deleteSkill = async () => {
     try {
       await fetch(`http://localhost:5001/skills/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`          
+        },
       })
       router.back()
     } catch (err) {

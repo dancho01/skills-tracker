@@ -1,14 +1,17 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db')
+const authenticateToken = require('../middleware/auth')
+
 
 // POST - Log a new session for particular skill
-router.post('/:id', async (req, res) => {
+router.post('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const { duration, notes } = req.body
-    const result = await pool.query('INSERT INTO sessions (user_id, skill_id, duration, notes) VALUES (1, $1, $2, $3) RETURNING *',
-      [id, duration, notes])
+    const user_id = req.user.userId;
+    const result = await pool.query('INSERT INTO sessions (user_id, skill_id, duration, notes) VALUES ($1, $2, $3, $4) RETURNING *',
+      [user_id, id, duration, notes])
     res.json(result.rows[0])
   } catch (err) {
     console.log(err.message)
@@ -16,9 +19,10 @@ router.post('/:id', async (req, res) => {
 })
 
 // GET - get all sessions for the user
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM sessions WHERE user_id = 1')
+    const user_id = req.user.userId;
+    const result = await pool.query('SELECT * FROM sessions WHERE user_id = $1', [user_id])
     res.json(result.rows)
   } catch (err) {
     console.log(err.message)
@@ -26,7 +30,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET - get all sessions for particular skill
-router.get('/skill/:id', async (req, res) => {
+router.get('/skill/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const result = await pool.query('SELECT * FROM sessions WHERE skill_id = $1', [id])
@@ -37,7 +41,7 @@ router.get('/skill/:id', async (req, res) => {
 })
 
 // GET - Get session details 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const result = await pool.query('SELECT * FROM sessions WHERE id = $1', [id])
@@ -48,7 +52,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // PUT - Update session
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const { duration, notes } = req.body
@@ -61,7 +65,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE - delete session
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     await pool.query('DELETE FROM sessions WHERE id = $1', [id])

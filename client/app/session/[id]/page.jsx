@@ -17,6 +17,7 @@ const page = () => {
   const [open, setOpen] = useState(false)
   const openModal = () => setOpen(true)
   const closeModal = () => setOpen(false)
+  const [token, setToken] = useState(null)
 
   const date = new Date(session?.created_at)
   const created = date.toLocaleString('en-US', {
@@ -30,7 +31,11 @@ const page = () => {
 
   const getSessionDetail = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/sessions/${id}`)
+      const res = await fetch(`http://localhost:5001/sessions/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      })
       const data = await res.json()
       setSession(data)
       setDuration(data.duration)
@@ -42,8 +47,13 @@ const page = () => {
   }
 
   useEffect(() => {
-    getSessionDetail()
+    setToken(localStorage.getItem('accessToken'));
   }, [])
+
+  useEffect(() => {
+    if (!token) return;
+    getSessionDetail()
+  }, [token])
 
   // updates session
   const updateSession = async () => {
@@ -51,7 +61,8 @@ const page = () => {
       await fetch(`http://localhost:5001/sessions/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           duration: duration,
@@ -69,7 +80,10 @@ const page = () => {
   const deleteSession = async () => {
     try {
       await fetch(`http://localhost:5001/sessions/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
       })
       router.back()
     } catch (err) {
