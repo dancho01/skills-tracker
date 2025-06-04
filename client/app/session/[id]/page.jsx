@@ -34,6 +34,11 @@ const page = () => {
   const getSessionDetail = async () => {
     try {
       const res = await fetchWithAuth(`http://localhost:5001/sessions/${id}`, {}, token)
+
+      if (res.status === 403) {
+        router.push('/forbidden')
+      }
+      
       const data = await res.json()
       setSession(data)
       setDuration(data.duration)
@@ -45,7 +50,12 @@ const page = () => {
   }
 
   useEffect(() => {
-    setToken(localStorage.getItem('accessToken'));
+    const token = localStorage.getItem('accessToken')
+    if (!token) {
+      router.push('/forbidden');
+    } else {
+      setToken(token);
+    }
   }, [])
 
   useEffect(() => {

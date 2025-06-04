@@ -44,7 +44,13 @@ router.get('/skill/:id', authenticateToken, async (req, res) => {
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
-    const result = await pool.query('SELECT * FROM sessions WHERE id = $1', [id])
+    const user_id = req.user.userId;
+    const result = await pool.query('SELECT * FROM sessions WHERE id = $1 AND user_id = $2', [id, user_id])
+
+    if (result.rows.length === 0) {
+      return res.status(403).json({ message: 'Forbidden' }); 
+    }
+    
     res.json(result.rows[0])
   } catch (err) {
     console.log(err.message)
