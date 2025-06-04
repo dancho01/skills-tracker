@@ -31,7 +31,7 @@ router.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Invalid credentials'});
     }
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '10s'})
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '15m'})
     const refresh = jwt.sign({ userId: user.id }, REFRESH_SECRET, { expiresIn: '7d'})
 
     res.cookie('refreshToken', refresh, {
@@ -53,7 +53,7 @@ router.post('/refresh', (req, res) => {
 
   jwt.verify(token, REFRESH_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
-    const newAccess = jwt.sign({ userId: user.userId }, JWT_SECRET, { expiresIn: '10s'})
+    const newAccess = jwt.sign({ userId: user.userId }, JWT_SECRET, { expiresIn: '15m'})
     res.json({ accessToken: newAccess });
   });
 })

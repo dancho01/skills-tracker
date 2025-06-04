@@ -14,6 +14,11 @@ const page = () => {
 
   const signup = async () => {
 
+    if (!email || !confirm || !password) {
+      setError('All fields are required');
+      return;
+    }
+
     if (password !== confirm) {
       setError('Passwords do not match')
       return;

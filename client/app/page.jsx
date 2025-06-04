@@ -7,10 +7,17 @@ import React, { useState } from 'react'
 const page = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const router = useRouter();
 
 
   const login = async () => {
+    if (!email || !password) {
+      setError('All fields are required');
+      return;
+    }
+    setError('');
+
     try {
       const res = await fetch('http://localhost:5001/auth/login', {
         method: 'POST',
@@ -23,6 +30,13 @@ const page = () => {
           password: password
         })
       });
+
+      if (res.status === 401) {
+        setError('Invalid credentials. Try again')
+        return
+      }
+      setError('');
+      
       const data = await res.json();
       localStorage.setItem('accessToken', data.token)
       router.push('/home')
@@ -46,6 +60,7 @@ const page = () => {
             <label className='font-medium'>Password</label>
             <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" className='border rounded-sm p-1'/>
           </div>
+          {error && <p className='bg-red-500 p-1 text-white font-medium'>{error}</p>}
           <button onClick={login} className='p-1 mt-5 rounded bg-blue-700 hover:bg-blue-600 text-white font-medium'>Submit</button>
         </div>
 
