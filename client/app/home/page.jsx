@@ -5,6 +5,7 @@ import Modal from '@/components/Modal';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '../utils/fetch';
+import Logout from '@/components/Logout';
 
 export default function Home() {
   const [allSkills, setAllSkills] = useState([])
@@ -19,17 +20,14 @@ export default function Home() {
   // Add new skill
   const addSkill = async () => {
     try {
-      await fetch('http://localhost:5001/skills', {
+      await fetchWithAuth('http://localhost:5001/skills', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({
           skill: skill,
           level: level
         })
-      })
+      }, token)
+
       closeModal()
       setSkill('')
       getSkills()
@@ -41,11 +39,7 @@ export default function Home() {
 
   const getSkills = async () => {
     try {
-      const res = await fetch('http://localhost:5001/skills', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const res = await fetchWithAuth('http://localhost:5001/skills', {}, token)
       const data = await res.json()
       setAllSkills(data)
     } catch (err) {
@@ -54,7 +48,12 @@ export default function Home() {
   }
   
   useEffect(() => {
-    setToken(localStorage.getItem('accessToken'));
+    const token = localStorage.getItem('accessToken')
+    if (!token) {
+      router.push('/forbidden');
+    } else {
+      setToken(token);
+    }
   }, [])
 
   useEffect(() => {
@@ -64,7 +63,7 @@ export default function Home() {
 
   return (
     <div className="bg-[#1e1e1e] h-screen">
-
+      <Logout />
       <div className="w-[80%] mx-auto pt-20">
         <h1 className="text-white text-4xl font-semibold">Skill Tracker</h1>  
         

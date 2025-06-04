@@ -3,8 +3,6 @@ const router = express.Router()
 const pool = require('../db')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
 
 require('dotenv').config();
 
@@ -33,7 +31,7 @@ router.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Invalid credentials'});
     }
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '15m'})
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '10s'})
     const refresh = jwt.sign({ userId: user.id }, REFRESH_SECRET, { expiresIn: '7d'})
 
     res.cookie('refreshToken', refresh, {
@@ -55,16 +53,20 @@ router.post('/refresh', (req, res) => {
 
   jwt.verify(token, REFRESH_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
-    const newAccess = jwt.sign({ userId: user.userId }, JWT_SECRET, { expiresIn: '15m'})
+    const newAccess = jwt.sign({ userId: user.userId }, JWT_SECRET, { expiresIn: '10s'})
     res.json({ accessToken: newAccess });
   });
 })
 
 router.post('/logout', (req, res) => {
+  // clear the refresh token cookie
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Strict',
+  });
+
   res.json('Logged out successfully')
-
-  // delete refresh token from DB 
 })
-
 
 module.exports = router;

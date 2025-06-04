@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Modal from '@/components/Modal';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '../../utils/fetch';
+import Logout from '@/components/Logout';
+
 
 const page = () => {
   const [skill, setSkill] = useState(null)
@@ -27,11 +30,7 @@ const page = () => {
 
   const getSkill = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/skills/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const res = await fetchWithAuth(`http://localhost:5001/skills/${id}`, {}, token)
       const data = await res.json()
 
       setSkill(data)
@@ -44,17 +43,13 @@ const page = () => {
   // posts a new session
   const addSession = async () => {
     try {
-      await fetch(`http://localhost:5001/sessions/${id}`, {
+      await fetchWithAuth(`http://localhost:5001/sessions/${id}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({
           duration: duration,
           notes: notes
         })
-      })
+      }, token)
       closeModal()
       setDuration('')
       setNotes('')
@@ -68,11 +63,7 @@ const page = () => {
   // get all the sessions for the skill 
   const getSessions = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/sessions/skill/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const res = await fetchWithAuth(`http://localhost:5001/sessions/skill/${id}`, {}, token)
       const data = await res.json()
       setSessions(data)
     } catch (err) {
@@ -82,11 +73,7 @@ const page = () => {
 
   const getTotalTime = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/stats/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const res = await fetchWithAuth(`http://localhost:5001/stats/${id}`, {}, token)
       const data = await res.json()
       setTotalTime(data)
     } catch (err) {
@@ -108,17 +95,12 @@ const page = () => {
   // updates a skill
   const updateSkill = async () => {
     try {
-      await fetch(`http://localhost:5001/skills/${id}`, {
+      await fetchWithAuth(`http://localhost:5001/skills/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-          
-        },
         body: JSON.stringify({
           level: level
         })
-      })
+      }, token)
       getSkill()
       setUpdateModal(false)
 
@@ -130,12 +112,9 @@ const page = () => {
   // deletes a skill
   const deleteSkill = async () => {
     try {
-      await fetch(`http://localhost:5001/skills/${id}`, {
+      await fetchWithAuth(`http://localhost:5001/skills/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`          
-        },
-      })
+      }, token)
       router.back()
     } catch (err) {
       console.log(err.message)
@@ -144,6 +123,7 @@ const page = () => {
   
   return (
     <div className="bg-[#1e1e1e] h-screen">
+      <Logout />
       <div className="w-[80%] mx-auto pt-20">
         <h1 className="text-white text-4xl font-semibold">{skill?.skill}</h1>  
         <h2 className='text-white text-2xl mt-4'>Level: {skill?.level}</h2>

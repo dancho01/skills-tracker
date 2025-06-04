@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import Modal from '@/components/Modal';
+import { fetchWithAuth } from '../../utils/fetch';
+import Logout from '@/components/Logout';
 
 
 const page = () => {
@@ -31,11 +33,7 @@ const page = () => {
 
   const getSessionDetail = async () => {
     try {
-      const res = await fetch(`http://localhost:5001/sessions/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-      })
+      const res = await fetchWithAuth(`http://localhost:5001/sessions/${id}`, {}, token)
       const data = await res.json()
       setSession(data)
       setDuration(data.duration)
@@ -58,17 +56,13 @@ const page = () => {
   // updates session
   const updateSession = async () => {
     try {
-      await fetch(`http://localhost:5001/sessions/${id}`, {
+      await fetchWithAuth(`http://localhost:5001/sessions/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({
           duration: duration,
           notes: notes
         })
-      })
+      }, token)
       getSessionDetail()
       closeModal()
     } catch (err) {
@@ -79,12 +73,9 @@ const page = () => {
   // deletes session
   const deleteSession = async () => {
     try {
-      await fetch(`http://localhost:5001/sessions/${id}`, {
+      await fetchWithAuth(`http://localhost:5001/sessions/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-      })
+      }, token)
       router.back()
     } catch (err) {
       console.log(err.message)
@@ -93,6 +84,7 @@ const page = () => {
 
   return (
     <div className='bg-[#1e1e1e] h-screen'>
+       <Logout />
       <div className="w-[80%] mx-auto pt-20">
         <h1 className="text-white text-4xl font-semibold">Session - {created}</h1>  
         <h2 className='text-white text-2xl mt-4'>Duration - {session?.duration} min</h2>

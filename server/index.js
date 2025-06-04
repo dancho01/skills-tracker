@@ -1,9 +1,15 @@
 const express = require('express')
 const cors = require('cors')
+const cookieParser = require('cookie-parser');
 
 const app = express()
-app.use(cors()) // clients from diff ports has access
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}))
+
 app.use(express.json()) // parses JSON
+app.use(cookieParser());
 
 const skillRoutes = require('./routes/skills')
 const sessionRoutes = require('./routes/sessions')
